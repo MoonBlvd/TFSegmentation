@@ -23,7 +23,7 @@ def create_exp_dirs(args):
     :param args: Arguments of the program
     :return: args , The new one which contains all needed dirs
     """
-    args.data_dir = os.path.realpath(os.getcwd()) + "/data/" + args.data_dir + "/"
+    # args.data_dir = os.path.realpath(os.getcwd()) + "/data/" + args.data_dir + "/"
     args.exp_dir = os.path.realpath(os.getcwd()) + "/experiments/" + args.exp_dir + "/"
     args.out_dir = os.path.realpath(os.getcwd()) + "/out/" + args.out_dir + "/"
     args.summary_dir = args.exp_dir + 'summaries/'

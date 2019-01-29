@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 
 from utils.img_utils import decode_labels
 from utils.seg_dataloader import SegDataLoader
-from tensorflow.contrib.data import Iterator
+from tensorflow.data import Iterator
 import os
 import pdb
 import torchfile
@@ -288,10 +288,14 @@ class Train(BasicTrain):
 
     @timeit
     def load_train_data(self, v2=False):
+        '''
+        Trian X is (num_img, H, W, channels)
+        Trian Y is (num_img, H, W)
+        '''
         print("Loading Training data..")
         self.train_data = {'X': np.load(self.args.data_dir + "X_train.npy"),
                            'Y': np.load(self.args.data_dir + "Y_train.npy")}
-        self.train_data = self.resize(self.train_data)
+        # self.train_data = self.resize(self.train_data)
 
         if v2:
             out_shape = (self.train_data['Y'].shape[1] // self.targets_resize,
@@ -910,12 +914,12 @@ class Train(BasicTrain):
             # Feed this variables to the network
             if self.args.random_cropping:
                 feed_dict = {self.test_model.x_pl_before: x_batch,
-                             self.test_model.y_pl_before: y_batch
+                             self.test_model.y_pl_before: y_batch,
                              self.test_model.is_training: False,
                              }
             else:
                 feed_dict = {self.test_model.x_pl: x_batch,
-                             self.test_model.y_pl: y_batch
+                             self.test_model.y_pl: y_batch,
                              self.test_model.is_training: False
                              }
 
