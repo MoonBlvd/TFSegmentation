@@ -5,8 +5,77 @@ This File will contain a reporter class which will allow us to report the whole 
 import json
 import numpy as np
 
-
 class Reporter:
+    """
+    This class will contain APIs to facilitate the process of reporting the experiment
+    """
+
+    def __init__(self, file_json_to_save, args):
+        self.report_dict = dict()
+        self.json_file = file_json_to_save
+        # init main keys in the report
+        self.report_dict['train-acc'] = {}
+        self.report_dict['train-loss'] = {}
+        self.report_dict['validation-acc'] = {}
+        self.report_dict['validation-loss'] = {}
+        self.report_dict['avg_inference_time_on_validation'] = {}
+        self.report_dict['validation-mean-iou'] = {}
+        self.report_dict['validation-total-mean-iou'] = {}
+
+        self.report_dict['validation-mean-iou']['unknown'] = {}
+        self.report_dict['validation-mean-iou']['sky'] = {}
+        self.report_dict['validation-mean-iou']['ground'] = {}
+        self.report_dict['validation-mean-iou']['building_wall'] = {}
+        self.report_dict['validation-mean-iou']['building_rooftop'] = {}
+        self.report_dict['validation-mean-iou']['small_rooftop_entrance'] = {}
+        self.report_dict['validation-mean-iou']['skylight'] = {}
+        self.report_dict['validation-mean-iou']['air_vents'] = {}
+        self.report_dict['validation-mean-iou']['ac_unit'] = {}
+        self.report_dict['validation-mean-iou']['seating'] = {}
+        self.report_dict['validation-mean-iou']['any_ducts'] = {}
+        self.report_dict['validation-mean-iou']['water_tower'] = {}
+        self.report_dict['validation-mean-iou']['chimney'] = {}
+        self.report_dict['validation-mean-iou']['tarp'] = {}
+        self.report_dict['validation-mean-iou']['vegetation'] = {}
+        self.report_dict['validation-mean-iou']['power_line'] = {}
+        self.report_dict['validation-mean-iou']['street_light'] = {}
+        self.report_dict['validation-mean-iou']['door'] = {}
+        # put the arguments of the report
+        self.report_dict['arguments-of-the-experiment'] = {}
+        for key, value in sorted(vars(args).items()):
+            self.report_dict['arguments-of-the-experiment'][key] = value
+
+    def finalize(self):
+        with open(self.json_file, 'w') as file:
+            json.dump(self.report_dict, file, sort_keys=True, indent=4)
+
+    def report(self, key, value):
+        self.report_dict[key] = value
+
+    def report_experiment_statistics(self, statistics, epoch, value):
+        self.report_dict[statistics][epoch] = value
+
+    def report_experiment_validation_iou(self, epoch, mean_iou, per_class_mean_iou):
+        self.report_dict['validation-total-mean-iou'][epoch] = mean_iou
+        # self.report_dict['validation-mean-iou']['unknown'] = str(per_class_mean_iou[0])
+        self.report_dict['validation-mean-iou']['sky'] = str(per_class_mean_iou[0])
+        self.report_dict['validation-mean-iou']['ground'] = str(per_class_mean_iou[1])
+        self.report_dict['validation-mean-iou']['building_wall'] = str(per_class_mean_iou[2])
+        self.report_dict['validation-mean-iou']['building_rooftop'] = str(per_class_mean_iou[3])
+        self.report_dict['validation-mean-iou']['small_rooftop_entrance'] = str(per_class_mean_iou[4])
+        self.report_dict['validation-mean-iou']['skylight'] = str(per_class_mean_iou[5])
+        self.report_dict['validation-mean-iou']['air_vents'] = str(per_class_mean_iou[6])
+        self.report_dict['validation-mean-iou']['ac_unit'] = str(per_class_mean_iou[7])
+        self.report_dict['validation-mean-iou']['seating'] = str(per_class_mean_iou[8])
+        self.report_dict['validation-mean-iou']['any_ducts'] = str(per_class_mean_iou[9])
+        self.report_dict['validation-mean-iou']['water_tower'] = str(per_class_mean_iou[10])
+        self.report_dict['validation-mean-iou']['chimney'] = str(per_class_mean_iou[11])
+        self.report_dict['validation-mean-iou']['tarp'] = str(per_class_mean_iou[12])
+        self.report_dict['validation-mean-iou']['vegetation'] = str(per_class_mean_iou[13])
+        self.report_dict['validation-mean-iou']['power_line'] = str(per_class_mean_iou[14])
+        self.report_dict['validation-mean-iou']['street_light'] = str(per_class_mean_iou[15])
+        self.report_dict['validation-mean-iou']['door'] = str(per_class_mean_iou[16])
+class CityscapesReporter:
     """
     This class will contain APIs to facilitate the process of reporting the experiment
     """
