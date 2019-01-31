@@ -928,7 +928,7 @@ class Train(BasicTrain):
             start = time.time()
 
             # run the feed_forward
-            _ = self.sess.run(
+            out_argmax = self.sess.run(
                 [self.test_model.out_argmax],
                 feed_dict=feed_dict)
 
