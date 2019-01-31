@@ -1,23 +1,23 @@
 # Directories arguments
-data_dir: "full_cityscapes_res"
+data_dir: "/media/DATA/UnrealLandingDataset/AirSimCollectData/" #"full_cityscapes_res"
 exp_dir:  "fcn8s_shufflenet"
 out_dir:  "fcn8s_shufflenet"
 
 # Data arguments
-img_height:   256
+img_height:   512 #256
 img_width:    512
 num_channels: 3
-num_classes:  20
+num_classes:  18 #20
 
 # Train arguments
-num_epochs: 200
+num_epochs: 100 #200
 batch_size: 8
 shuffle: True
 data_mode: "experiment"
 save_every: 10
 test_every: 10
 max_to_keep: 1
-weighted_loss: True
+weighted_loss: False #True
 random_cropping: False
 freeze_encoder: False
 
