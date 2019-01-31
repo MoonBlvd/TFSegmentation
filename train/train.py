@@ -1,7 +1,8 @@
 """
 Trainer class to train Segmentation models
 """
-
+import sys
+from sys import exit
 from train.basic_train import BasicTrain
 from metrics.metrics import Metrics
 from utils.reporter import Reporter
@@ -891,7 +892,7 @@ class Train(BasicTrain):
         print("Saving graph...")
         tf.train.write_graph(self.sess.graph_def, ".", 'graph.pb')
         print("Graph saved successfully.\n\n")
-        exit(1)
+#         exit(1)
 
         # init tqdm and get the epoch value
         tt = tqdm(range(self.test_data_len))
