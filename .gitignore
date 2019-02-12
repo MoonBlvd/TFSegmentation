@@ -1,3 +1,9 @@
+.DS_Store
+*.pdf
+config/.DS_Store
+*.png
+seg_outputs.npy
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
