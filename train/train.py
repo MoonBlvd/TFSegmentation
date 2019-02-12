@@ -29,7 +29,7 @@ from utils.seg_dataloader import SegDataLoader
 from tensorflow.data import Iterator
 import os
 import pdb
-import torchfile
+# import torchfile
 from data.postprocess import postprocess
 
 
