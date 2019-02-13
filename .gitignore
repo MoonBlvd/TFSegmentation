@@ -3,6 +3,7 @@
 config/.DS_Store
 *.png
 seg_outputs.npy
+ipython_scripts/temp_summary/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
