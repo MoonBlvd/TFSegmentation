@@ -677,7 +677,7 @@ class Train(BasicTrain):
                 self.metrics.update_metrics_batch(out_argmax, y_batch)
                 # mean over batches
                 total_acc = np.mean(acc_list)
-                mean_iou = self.metrics.compute_final_metrics(self.num_iterations_validation_per_epoch)
+                _, mean_iou = self.metrics.compute_final_metrics(self.num_iterations_validation_per_epoch)
                 mean_iou_arr = self.metrics.iou
                 mean_inference = str(np.mean(inf_list)) + '-seconds'
                 # summarize
@@ -805,7 +805,7 @@ class Train(BasicTrain):
         # mean over batches
         total_loss = 0
         total_acc = np.mean(acc_list)
-        mean_iou = self.metrics.compute_final_metrics(self.test_data_len)
+        _, mean_iou = self.metrics.compute_final_metrics(self.test_data_len)
 
         # print in console
         tt.close()
@@ -1024,6 +1024,6 @@ class Train(BasicTrain):
 
         self.metrics.update_metrics(out_argmax[0], self.debug_y, 0, 0)
 
-        mean_iou = self.metrics.compute_final_metrics(1)
+        _, mean_iou = self.metrics.compute_final_metrics(1)
 
         print("mean_iou_of_debug: " + str(mean_iou))
