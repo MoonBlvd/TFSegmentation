@@ -19,6 +19,10 @@ def strip(input_graph, drop_scope):
     print("Nodes hash table is built!")
     # go through the hash table to get rid of switch node
     nodes_after_strip = []
+
+    # create a new input node to get rid of split and normalization    
+    # new_input_node = node_def_pb2.NodeDef()
+    # new_input_node.CopyFrom(all_nodes_hash["network/input/Placeholder"])
     for node_name, node in all_nodes_hash.items():
         if node.op in drop_scope:
             continue
@@ -28,20 +32,31 @@ def strip(input_graph, drop_scope):
                 del node.input
             except:
                 pass
+        if 'Pre_Processing' in node.name:
+            # get rid of all pre_processing nodes
+            continue 
+        if node.name == 'network/input/Placeholder_2':
+            continue
+
         old_input = node.input
         new_node = node_def_pb2.NodeDef()
         new_node.CopyFrom(node)
-        for intput_name in old_input:
+        for input_name in old_input:
             # preprocess the input name so that it can be used as hashtabel keys
-            filtered_input_name = intput_name.split(':')[0]
+            filtered_input_name = input_name.split(':')[0]
             if filtered_input_name.startswith('^'):
                 filtered_input_name = filtered_input_name[1:]
+            
+            # change the input of the first Conv2D from concat to placeholder
+            if input_name == 'network/mobilenet_encoder/Pre_Processing/concat':
+                new_node.input.remove(input_name)
+                new_node.input.append(all_nodes_hash['network/input/Placeholder'].name)
 
             try:
                 if all_nodes_hash[filtered_input_name].op == 'Switch':
                     # if one input to the current node is a Switch node, then get rid of that Switch node 
                     # by changing the input of the current tobe the input to that Switch node.
-                    new_node.input.remove(intput_name)
+                    new_node.input.remove(input_name)
                     for input_of_input in all_nodes_hash[filtered_input_name].input:
                         if input_of_input != "network/input/Placeholder_2":
                             new_node.input.append(input_of_input)
@@ -51,7 +66,7 @@ def strip(input_graph, drop_scope):
                     Merge node merges multiple input by forwarding the first recieved input as the output
                     Thus we remove Merge nodes by always forwarding the first input to the Merge node to teh output
                     '''
-                    new_node.input.remove(intput_name)
+                    new_node.input.remove(input_name)
                     new_node.input.append(all_nodes_hash[filtered_input_name].input[0])
 
             except:
