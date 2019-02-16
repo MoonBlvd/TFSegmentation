@@ -20,7 +20,7 @@ def strip(input_graph, drop_scope):
     # go through the hash table to get rid of switch node
     nodes_after_strip = []
     for node_name, node in all_nodes_hash.items():
-        if node.op == drop_scope:
+        if node.op in drop_scope:
             continue
         if node.op == 'Const':
             # const node doesn't need input
@@ -38,13 +38,22 @@ def strip(input_graph, drop_scope):
                 filtered_input_name = filtered_input_name[1:]
 
             try:
-                if all_nodes_hash[filtered_input_name].op == drop_scope:
+                if all_nodes_hash[filtered_input_name].op == 'Switch':
                     # if one input to the current node is a Switch node, then get rid of that Switch node 
                     # by changing the input of the current tobe the input to that Switch node.
                     new_node.input.remove(intput_name)
                     for input_of_input in all_nodes_hash[filtered_input_name].input:
                         if input_of_input != "network/input/Placeholder_2":
                             new_node.input.append(input_of_input)
+                
+                if all_nodes_hash[filtered_input_name].op == 'Merge':
+                    '''
+                    Merge node merges multiple input by forwarding the first recieved input as the output
+                    Thus we remove Merge nodes by always forwarding the first input to the Merge node to teh output
+                    '''
+                    new_node.input.remove(intput_name)
+                    new_node.input.append(all_nodes_hash[filtered_input_name].input[0])
+
             except:
                 print("Error node: ", new_node)
                 raise NameError(filtered_input_name)
@@ -84,7 +93,7 @@ def main():
 
     print ("Before:")
     print_graph(input_graph_def)
-    output_graph_def = strip(input_graph_def, drop_scope='Switch')
+    output_graph_def = strip(input_graph_def, drop_scope=['Switch', 'Merge'])
     print ("After:")
     print_graph(output_graph_def)
 
