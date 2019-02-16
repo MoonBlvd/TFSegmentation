@@ -7,33 +7,50 @@ from tensorflow.core.framework import node_def_pb2
 
 def print_graph(input_graph):
     for node in input_graph.node:
-        print "{0} : {1} ( {2} )".format(node.name, node.op, node.input)
+        print ("{0} : {1} ( {2} )".format(node.name, node.op, node.input))
 
-def strip(input_graph, drop_scope, input_before, output_after, pl_name):
-    input_nodes = input_graph.node
+def strip(input_graph, drop_scope):
     nodes_after_strip = []
-    for node in input_nodes:
-        print "{0} : {1} ( {2} )".format(node.name, node.op, node.input)
-
-        if node.name.startswith(drop_scope + '/'):
+    # save all nodes to a hashtable
+    all_nodes_hash = {}
+    for node in input_graph.node:
+        print ("{0} : {1} ( {2} )".format(node.name, node.op, node.input))
+        all_nodes_hash[node.name] = node
+    print("Nodes hash table is built!")
+    # go through the hash table to get rid of switch node
+    nodes_after_strip = []
+    for node_name, node in all_nodes_hash.items():
+        if node.op == drop_scope:
             continue
-
-        if node.name == pl_name:
-            continue
-
+        if node.op == 'Const':
+            # const node doesn't need input
+            try:
+                del node.input
+            except:
+                pass
+        old_input = node.input
         new_node = node_def_pb2.NodeDef()
         new_node.CopyFrom(node)
-        if new_node.name == output_after:
-            new_input = []
-            for node_name in new_node.input:
-                if node_name == drop_scope + '/cond/Merge':
-                    new_input.append(input_before)
-                else:
-                    new_input.append(node_name)
-            del new_node.input[:]
-            new_node.input.extend(new_input)
+        for intput_name in old_input:
+            # preprocess the input name so that it can be used as hashtabel keys
+            filtered_input_name = intput_name.split(':')[0]
+            if filtered_input_name.startswith('^'):
+                filtered_input_name = filtered_input_name[1:]
+
+            try:
+                if all_nodes_hash[filtered_input_name].op == drop_scope:
+                    # if one input to the current node is a Switch node, then get rid of that Switch node 
+                    # by changing the input of the current tobe the input to that Switch node.
+                    new_node.input.remove(intput_name)
+                    for input_of_input in all_nodes_hash[filtered_input_name].input:
+                        if input_of_input != "network/input/Placeholder_2":
+                            new_node.input.append(input_of_input)
+            except:
+                print("Error node: ", new_node)
+                raise NameError(filtered_input_name)
         nodes_after_strip.append(new_node)
 
+    print("New graph is built!")
     output_graph = graph_pb2.GraphDef()
     output_graph.node.extend(nodes_after_strip)
     return output_graph
@@ -65,10 +82,10 @@ def main():
         else:
             text_format.Merge(f.read().decode("utf-8"), input_graph_def)
 
-    print "Before:"
+    print ("Before:")
     print_graph(input_graph_def)
-    output_graph_def = strip(input_graph_def, u'l_fc1_dropout', u'l_fc1/Relu', u'prediction/MatMul', u'is_training_pl')
-    print "After:"
+    output_graph_def = strip(input_graph_def, drop_scope='Switch')
+    print ("After:")
     print_graph(output_graph_def)
 
     if output_binary:
