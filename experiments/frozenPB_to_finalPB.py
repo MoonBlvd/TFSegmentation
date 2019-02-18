@@ -41,7 +41,7 @@ def strip(input_graph, drop_scope):
         old_input = node.input
         new_node = node_def_pb2.NodeDef()
         new_node.CopyFrom(node)
-        for input_name in old_input:
+        for input_idx, input_name in enumerate(old_input):
             # preprocess the input name so that it can be used as hashtabel keys
             filtered_input_name = input_name.split(':')[0]
             if filtered_input_name.startswith('^'):
@@ -49,25 +49,29 @@ def strip(input_graph, drop_scope):
             
             # change the input of the first Conv2D from concat to placeholder
             if input_name == 'network/mobilenet_encoder/Pre_Processing/concat':
-                new_node.input.remove(input_name)
-                new_node.input.append(all_nodes_hash['network/input/Placeholder'].name)
+                # note that the order of the inputs to a node matters!
+                new_node.input[input_idx] = all_nodes_hash['network/input/Placeholder'].name
 
             try:
                 if all_nodes_hash[filtered_input_name].op == 'Switch':
                     # if one input to the current node is a Switch node, then get rid of that Switch node 
                     # by changing the input of the current tobe the input to that Switch node.
-                    new_node.input.remove(input_name)
-                    for input_of_input in all_nodes_hash[filtered_input_name].input:
-                        if input_of_input != "network/input/Placeholder_2":
-                            new_node.input.append(input_of_input)
+                    input_detoured = False
+                    for input_of_switch in all_nodes_hash[filtered_input_name].input:
+                        if input_of_switch != "network/input/Placeholder_2":
+                            new_node.input[input_idx] = input_of_switch
+                            input_detoured = True
+                            #new_node.input.append(input_of_input)
+                    if not input_detoured:
+                        #remove the input if it has two inputs and both are placeholder_2
+                        new_node.input.remove(input_name)
                 
                 if all_nodes_hash[filtered_input_name].op == 'Merge':
                     '''
                     Merge node merges multiple input by forwarding the first recieved input as the output
                     Thus we remove Merge nodes by always forwarding the first input to the Merge node to teh output
                     '''
-                    new_node.input.remove(input_name)
-                    new_node.input.append(all_nodes_hash[filtered_input_name].input[0])
+                    new_node.input[input_idx] = all_nodes_hash[filtered_input_name].input[0]
 
             except:
                 print("Error node: ", new_node)

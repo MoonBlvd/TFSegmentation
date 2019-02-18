@@ -43,8 +43,6 @@ def freeze_graph(model_dir, output_node_names):
         # We restore the weights
         saver.restore(sess, input_checkpoint)
 
-
-
         # We use a built-in TF helper to export variables to constants
         output_graph_def = tf.graph_util.convert_variables_to_constants(
             sess, # The session is used to retrieve the weights
