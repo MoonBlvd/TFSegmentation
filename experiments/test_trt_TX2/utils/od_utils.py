@@ -148,3 +148,32 @@ def detect(origimg, tf_sess, conf_th, od_type='ssd'):
         origimg, boxes_out, scores_out, classes_out, conf_th)
 
     return (box, conf, cls)
+
+def segment(origimg, tf_sess, conf_th, od_type='ssd'):
+    """Do semantic segmentation over 1 image."""
+    global avg_time
+
+    tf_input = tf_sess.graph.get_tensor_by_name('network/input/Placeholder:0')
+    tf_output = tf_sess.graph.get_tensor_by_name('network/output/Softmax:0')
+    #tf_num = tf_sess.graph.get_tensor_by_name('num_detections:0')
+
+
+    img = origimg
+    # if od_type == 'faster_rcnn':
+    #     img = _preprocess(origimg, (1024, 576))
+    # elif od_type == 'ssd':
+    #     img = _preprocess(origimg, (300, 300))
+    # else:
+    #     raise ValueError('bad object detector type: $s' % od_type)
+
+    if MEASURE_MODEL_TIME:
+        tic = time.time()
+
+    segmentation = tf_sess.run(tf_output, feed_dict={tf_input: img[None, ...]})
+
+    if MEASURE_MODEL_TIME:
+        td = (time.time() - tic) * 1000  # in ms
+        avg_time = avg_time * 0.9 + td * 0.1
+        print('tf_sess.run() took {:.1f} ms on average'.format(avg_time))
+
+    return segmentation
