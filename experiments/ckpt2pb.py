@@ -34,11 +34,14 @@ def freeze_graph(model_dir, output_node_names):
 
     # We clear devices to allow TensorFlow to control on which device it will load operations
     clear_devices = True
+    #with tf.name_scope('network/input'):
+    new_placeholder = tf.placeholder(tf.float32, shape=(1, 512, 512, 3),name='network/input/Placeholder')
 
     # We start a session using a temporary fresh Graph
     with tf.Session(graph=tf.Graph()) as sess:
         # We import the meta graph in the current default Graph
         saver = tf.train.import_meta_graph(input_checkpoint + '.meta', clear_devices=clear_devices)
+        #saver = tf.train.import_meta_graph(input_checkpoint + '.meta', input_map={'network/input/Placeholder:0':new_placeholder}, clear_devices=clear_devices, import_scope='import')
 
         # We restore the weights
         saver.restore(sess, input_checkpoint)
@@ -49,13 +52,14 @@ def freeze_graph(model_dir, output_node_names):
             tf.get_default_graph().as_graph_def(), # The graph_def is used to retrieve the nodes 
             output_node_names.split(",") # The output node names are used to select the usefull nodes
         ) 
+
         output_graph_def = tf.graph_util.remove_training_nodes(
                              output_graph_def,
                              protected_nodes=None
                              )
         
         # print all node names
-        [print(n) for n in output_graph_def.node]
+        #[print(n) for n in output_graph_def.node]
 
         # Finally we serialize and dump the output graph to the filesystem
         with tf.gfile.GFile(output_graph, "wb") as f:
