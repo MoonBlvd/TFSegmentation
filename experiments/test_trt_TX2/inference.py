@@ -1,8 +1,9 @@
 import logging
 import tensorflow as tf
+import numpy as np
 
 from utils.od_utils import build_trt_pb, load_trt_pb, \
-                           write_graph_tensorboard, detect
+                           write_graph_tensorboard, segment
 
 def main():
 
@@ -28,11 +29,11 @@ def main():
     #     logger.info('writing graph summary to TensorBoard')
     #     write_graph_tensorboard(tf_sess, log_path)
 
-    # logger.info('warming up the TRT graph with a dummy image')
+    logger.info('warming up the TRT graph with a dummy image')
     # od_type = 'faster_rcnn' if 'faster_rcnn' in args.model else 'ssd'
-    # dummy_img = np.zeros((720, 1280, 3), dtype=np.uint8)
-    # _, _, _ = detect(dummy_img, tf_sess, conf_th=.3, od_type=od_type)
-
+    dummy_img = np.zeros((8, 512, 512, 3), dtype=np.uint8)
+    segmentation = segment(dummy_img, tf_sess)
+    print("segmentation size:", segmentation.shape)
 
 if __name__ == "__main__":
     main()

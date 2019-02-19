@@ -11,7 +11,7 @@ import tensorflow as tf
 import tensorflow.contrib.tensorrt as trt
 
 
-MEASURE_MODEL_TIME = False
+MEASURE_MODEL_TIME = True
 avg_time = 0.0
 
 
@@ -149,12 +149,12 @@ def detect(origimg, tf_sess, conf_th, od_type='ssd'):
 
     return (box, conf, cls)
 
-def segment(origimg, tf_sess, conf_th, od_type='ssd'):
+def segment(origimg, tf_sess, od_type='ssd'):
     """Do semantic segmentation over 1 image."""
     global avg_time
 
     tf_input = tf_sess.graph.get_tensor_by_name('network/input/Placeholder:0')
-    tf_output = tf_sess.graph.get_tensor_by_name('network/output/Softmax:0')
+    tf_output = tf_sess.graph.get_tensor_by_name('network/upscore_8s/upscore8/upscore8/BiasAdd:0') # 'network/output/Softmax:0'
     #tf_num = tf_sess.graph.get_tensor_by_name('num_detections:0')
 
 
@@ -169,7 +169,8 @@ def segment(origimg, tf_sess, conf_th, od_type='ssd'):
     if MEASURE_MODEL_TIME:
         tic = time.time()
 
-    segmentation = tf_sess.run(tf_output, feed_dict={tf_input: img[None, ...]})
+    print("input image shape: ", img.shape)
+    segmentation = tf_sess.run(tf_output, feed_dict={tf_input: img})#[None, ...]
 
     if MEASURE_MODEL_TIME:
         td = (time.time() - tic) * 1000  # in ms
