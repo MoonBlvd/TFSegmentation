@@ -38,9 +38,10 @@ def strip(input_graph, drop_scope):
         if node.name == 'network/input/Placeholder_2':
             continue
 
-        if input_name == 'network/input/Placeholder':
+        if node.name == 'network/input/Placeholder':
             print("changing the input to batch_size = 1")
-            print(node.attr['shape'])
+            node.attr['shape'].shape.dim[0].size = 1
+            print("the changed size input node is:", node)
 
         old_input = node.input
         new_node = node_def_pb2.NodeDef()
