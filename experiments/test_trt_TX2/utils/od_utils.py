@@ -166,15 +166,16 @@ def segment(origimg, tf_sess, od_type='ssd'):
     # else:
     #     raise ValueError('bad object detector type: $s' % od_type)
 
-    if MEASURE_MODEL_TIME:
-        tic = time.time()
+#     if MEASURE_MODEL_TIME:
+#         tic = time.time()
 
-    print("input image shape: ", img.shape)
+    # print("input image shape: ", tf_input.shape)
+    # print("output image shape: ", tf_output.shape)
     segmentation = tf_sess.run(tf_output, feed_dict={tf_input: img})#[None, ...]
 
-    if MEASURE_MODEL_TIME:
-        td = (time.time() - tic) * 1000  # in ms
-        avg_time = avg_time * 0.9 + td * 0.1
-        print('tf_sess.run() took {:.1f} ms on average'.format(avg_time))
+#     if MEASURE_MODEL_TIME:
+#         td = (time.time() - tic) * 1000  # in ms
+#         avg_time = avg_time * 0.9 + td * 0.1
+#         print('tf_sess.run() took {:.1f} ms on average'.format(avg_time))
 
     return segmentation
