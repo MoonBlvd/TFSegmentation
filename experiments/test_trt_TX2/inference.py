@@ -1,6 +1,8 @@
 import logging
 import tensorflow as tf
 import numpy as np
+from PIL import Image
+import time
 
 from utils.od_utils import build_trt_pb, load_trt_pb, \
                            write_graph_tensorboard, segment
@@ -31,8 +33,20 @@ def main():
 
     logger.info('warming up the TRT graph with a dummy image')
     # od_type = 'faster_rcnn' if 'faster_rcnn' in args.model else 'ssd'
-    dummy_img = np.zeros((8, 512, 512, 3), dtype=np.uint8)
-    segmentation = segment(dummy_img, tf_sess)
+    # dummy_img = np.zeros((8, 512, 512, 3), dtype=np.uint8)
+    all_images = np.load('/media/DATA/UnrealLandingDataset/AirSimCollectData/X_val.npy')
+    
+    start = time.time()
+    for i in range(0, all_images.shape[0], 1):
+        try:
+            image = all_images[i:i+1,:,:,:]
+            segmentation = segment(image, tf_sess)
+            if i%100 == 0:
+                print(i)
+        except:
+            pass
+    elipse = time.time() - start
+    print(elipse/i)
     print("segmentation size:", segmentation.shape)
 
 if __name__ == "__main__":
