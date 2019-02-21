@@ -36,16 +36,18 @@ def main():
     # dummy_img = np.zeros((8, 512, 512, 3), dtype=np.uint8)
     all_images = np.load('/media/DATA/UnrealLandingDataset/AirSimCollectData/X_val.npy')
     
-    start = time.time()
+    elipse = 0
+
     for i in range(0, all_images.shape[0], 1):
         try:
             image = all_images[i:i+1,:,:,:]
+            start = time.time()
             segmentation = segment(image, tf_sess)
+            elipse += time.time() - start
             if i%100 == 0:
                 print(i)
         except:
             pass
-    elipse = time.time() - start
     print(elipse/i)
     print("segmentation size:", segmentation.shape)
 
