@@ -9,13 +9,15 @@ from utils.od_utils import build_trt_pb, load_trt_pb, \
 
 def main():
 
-    pb_path = "final_model.pb"#"frozen_model.pb"# "optimized_model.pb"#"mobilenet_fcn8s.pb"
+    pb_path = "mobilenet_fcn8s.pb"#"frozen_model.pb"# "optimized_model.pb"#"mobilenet_fcn8s.pb"
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     # Ask tensorflow logger not to propagate logs to parent (which causes
     # duplicated logging)
     logging.getLogger('tensorflow').propagate = False
 
+#     build_trt_pb(model_name, pb_path, download_dir='data')
+    
     logger.info('loading TRT graph from pb: %s' % pb_path)
     trt_graph = load_trt_pb(pb_path)
 
@@ -40,7 +42,7 @@ def main():
 
     for i in range(0, all_images.shape[0], 1):
         try:
-            image = all_images[i:i+1,:,:,:]
+            image = all_images[i:i+1,:,:,:].astype('float16')
             start = time.time()
             segmentation = segment(image, tf_sess)
             elipse += time.time() - start
