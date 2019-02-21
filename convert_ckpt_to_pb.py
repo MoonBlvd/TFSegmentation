@@ -21,6 +21,7 @@ def model_to_graph(model, ops, drop_scope = ['Switch', 'Merge'],
                 tf.get_default_graph().as_graph_def(), # The graph_def is used to retrieve the nodes 
                 output_node_names.split(",") # The output node names are used to select the usefull nodes
             ) 
+     
 
     output_graph_def = tf.graph_util.remove_training_nodes(
                         output_graph_def,
