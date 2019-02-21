@@ -13,7 +13,9 @@ DT_HALF = 19
 def model_to_graph(model, ops, drop_scope = ['Switch', 'Merge'], 
                    verbose=True, 
                    save_file=None,
-                   conver_to_half=True):
+                   remove_training=True,
+                   strip_nodes=False,
+                   conver_to_half=False):
     '''Load graph from model'''
     output_node_names = "network/output/Softmax"#"network/output/Reshape_1"#
     output_graph_def = tf.graph_util.convert_variables_to_constants(
@@ -21,13 +23,18 @@ def model_to_graph(model, ops, drop_scope = ['Switch', 'Merge'],
                 tf.get_default_graph().as_graph_def(), # The graph_def is used to retrieve the nodes 
                 output_node_names.split(",") # The output node names are used to select the usefull nodes
             ) 
-
+     
+    if not remove_training:
+        return output_graph_def
+    
     output_graph_def = tf.graph_util.remove_training_nodes(
                         output_graph_def,
                         protected_nodes=None
                         )
     
-
+    if not strip_nodes:
+        return output_graph_def
+    
     '''Drop nodes that TRT doesn't support'''
     new_output_graph_def = strip(output_graph_def, drop_scope)
     
