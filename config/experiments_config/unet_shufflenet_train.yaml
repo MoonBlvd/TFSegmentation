@@ -1,16 +1,17 @@
 # Directories arguments
-data_dir: "full_cityscapes_res"
+data_dir: "/media/DATA/UnrealLandingDataset/AirSimCollectData/"
+val_dir: "/media/DATA/UnrealLandingDataset/AirSimCollectData/CV_Manual/"
 exp_dir:  "unet_shufflenet"
 out_dir:  "unet_shufflenet"
 
 # Data arguments
 img_height:   512
-img_width:    1024
+img_width:    512 #1024
 num_channels: 3
-num_classes:  20
+num_classes:  18 #20
 
 # Train arguments
-num_epochs: 200
+num_epochs: 100 #200
 batch_size: 4
 shuffle: True
 data_mode: "experiment"

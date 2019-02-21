@@ -185,8 +185,8 @@ class Train(BasicTrain):
             self.data_session.run(self.init_op)
 
         print("Loading Validation data in memoryfor faster training..")
-        self.val_data = {'X': np.load(self.args.data_dir + "X_val.npy"),
-                         'Y': np.load(self.args.data_dir + "Y_val.npy")}
+        self.val_data = {'X': np.load(self.args.val_dir + "X_val.npy"),
+                         'Y': np.load(self.args.val_dir + "Y_val.npy")}
         # self.crop()
         # import cv2
         # cv2.imshow('crop1', self.val_data['X'][0,:,:,:])
@@ -316,8 +316,8 @@ class Train(BasicTrain):
         print("Training data is loaded")
 
         print("Loading Validation data..")
-        self.val_data = {'X': np.load(self.args.data_dir + "X_val.npy"),
-                         'Y': np.load(self.args.data_dir + "Y_val.npy")}
+        self.val_data = {'X': np.load(self.args.val_dir + "X_val.npy"),
+                         'Y': np.load(self.args.val_dir + "Y_val.npy")}
         self.val_data['Y_large'] = self.val_data['Y']
         if v2:
             out_shape = (self.val_data['Y'].shape[1] // self.targets_resize,
@@ -348,8 +348,8 @@ class Train(BasicTrain):
         print("Training data is loaded")
 
         print("Loading Validation data..")
-        self.val_data = {'X': np.load(self.args.data_dir + "X_val.npy"),
-                         'Y': np.load(self.args.data_dir + "Y_val.npy")}
+        self.val_data = {'X': np.load(self.args.val_dir + "X_val.npy"),
+                         'Y': np.load(self.args.val_dir + "Y_val.npy")}
         self.val_data_len = self.val_data['X'].shape[0] - self.val_data['X'].shape[0] % self.args.batch_size
         self.num_iterations_validation_per_epoch = (
                                                            self.val_data_len + self.args.batch_size - 1) // self.args.batch_size
@@ -372,8 +372,8 @@ class Train(BasicTrain):
     @timeit
     def load_val_data(self, v2=False):
         print("Loading Validation data..")
-        self.test_data = {'X': np.load(self.args.data_dir + "X_val.npy"),
-                          'Y': np.load(self.args.data_dir + "Y_val.npy")}
+        self.test_data = {'X': np.load(self.args.val_dir + "X_val.npy"),
+                          'Y': np.load(self.args.val_dir + "Y_val.npy")}
         self.test_data = self.resize(self.test_data)
         self.test_data['Y_large'] = self.test_data['Y']
         if v2:

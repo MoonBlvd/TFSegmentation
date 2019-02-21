@@ -10,5 +10,5 @@ args = parser.parse_args()
 gf = tf.GraphDef()
 gf.ParseFromString(open(args.pb_file,'rb').read())
 for n in gf.node:
-    print(n.name + '=>' +  n.op)
+    print(n)
 

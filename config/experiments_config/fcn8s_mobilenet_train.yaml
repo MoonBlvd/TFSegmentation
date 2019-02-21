@@ -1,5 +1,6 @@
 # Directories arguments
 data_dir: "/media/DATA/UnrealLandingDataset/AirSimCollectData/" # "full_cityscapes_res"
+val_dir: "/media/DATA/UnrealLandingDataset/AirSimCollectData/CV_Manual/" # "full_cityscapes_res"
 exp_dir:  "fcn8s_mobilenet"
 out_dir:  "fcn8s_mobilenet"
 
