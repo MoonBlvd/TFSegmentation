@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import tensorflow as tf
 from google.protobuf import text_format
 from tensorflow.core.framework import graph_pb2
@@ -9,7 +10,10 @@ DT_FLOAT = 1
 DT_HALF = 19
 
     
-def model_to_graph(model, ops, drop_scope = ['Switch', 'Merge'], verbose=True, save_file=None):
+def model_to_graph(model, ops, drop_scope = ['Switch', 'Merge'], 
+                   verbose=True, 
+                   save_file=None,
+                   conver_to_half=True):
     '''Load graph from model'''
     output_node_names = "network/output/Softmax"#"network/output/Reshape_1"#
     output_graph_def = tf.graph_util.convert_variables_to_constants(
@@ -26,6 +30,9 @@ def model_to_graph(model, ops, drop_scope = ['Switch', 'Merge'], verbose=True, s
 
     '''Drop nodes that TRT doesn't support'''
     new_output_graph_def = strip(output_graph_def, drop_scope)
+    
+    if not conver_to_half:
+        return new_output_graph_def
 
     '''Convert model from float32 to float16 '''
     for node in new_output_graph_def.node:
