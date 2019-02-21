@@ -9,7 +9,8 @@ import struct
 DT_FLOAT = 1
 DT_HALF = 19
 
-    
+
+
 def model_to_graph(model, ops, drop_scope = ['Switch', 'Merge'], 
                    verbose=True, 
                    save_file=None,
@@ -42,7 +43,42 @@ def model_to_graph(model, ops, drop_scope = ['Switch', 'Merge'],
         return new_output_graph_def
 
     '''Convert model from float32 to float16 '''
-    for node in new_output_graph_def.node:
+    new_output_graph_def = float2half(new_output_graph_def)
+#     for node in new_output_graph_def.node:
+#         if node.name == 'network/input/Placeholder':
+#             node.attr['dtype'].type = DT_HALF
+        
+#         if node.op in ops:
+#     #     try:
+#             node.attr['T'].type = DT_HALF
+#     #     except:
+#     #         pass
+            
+#         if node.op == 'Const':
+#             node.attr['dtype'].type = DT_HALF
+#             node.attr['value'].tensor.dtype = DT_HALF
+
+#             floats = node.attr['value'].tensor.tensor_content
+
+#             floats = struct.unpack('f' * int(len(floats) / 4), floats)
+#             halfs = np.array(floats).astype(np.float16).view(np.uint16)
+#             node.attr['value'].tensor.tensor_content = struct.pack('H' * len(halfs), *halfs)
+
+    if save_file is not None:
+        # Finally we serialize and dump the output graph to the filesystem
+        with tf.gfile.GFile(save_file, "wb") as f:
+            f.write(new_output_graph_def.SerializeToString())
+        print("%d ops in the final graph." % len(new_output_graph_def.node))
+
+    if verbose:
+        for node in new_output_graph_def.node:
+            print(node)
+
+    return new_output_graph_def
+
+def float2half(graph_def):
+    '''Convert model from float32 to float16 '''
+    for node in graph_def.node:
         if node.name == 'network/input/Placeholder':
             node.attr['dtype'].type = DT_HALF
         
@@ -61,18 +97,7 @@ def model_to_graph(model, ops, drop_scope = ['Switch', 'Merge'],
             floats = struct.unpack('f' * int(len(floats) / 4), floats)
             halfs = np.array(floats).astype(np.float16).view(np.uint16)
             node.attr['value'].tensor.tensor_content = struct.pack('H' * len(halfs), *halfs)
-
-    if save_file is not None:
-        # Finally we serialize and dump the output graph to the filesystem
-        with tf.gfile.GFile(save_file, "wb") as f:
-            f.write(new_output_graph_def.SerializeToString())
-        print("%d ops in the final graph." % len(new_output_graph_def.node))
-
-    if verbose:
-        for node in new_output_graph_def.node:
-            print(node)
-
-    return new_output_graph_def
+    return graph_def
 
 def strip(input_graph, drop_scope):
     nodes_after_strip = []

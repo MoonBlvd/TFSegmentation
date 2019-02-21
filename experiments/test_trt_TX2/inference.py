@@ -6,10 +6,12 @@ import time
 
 from utils.od_utils import build_trt_pb, load_trt_pb, \
                            write_graph_tensorboard, segment
-
+import sys
+sys.path.append('../../')
+from convert_ckpt_to_pb import float2half
 def main():
 
-    pb_path = "../fcn8s_mobilenet/checkpoints/best/final_model.pb"#"mobilenet_fcn8s.pb"#"frozen_model.pb"# "optimized_model.pb"#"mobilenet_fcn8s.pb"
+    pb_path = "../fcn8s_mobilenet/train_val_checkpoints/checkpoints/best/final_model.pb"#"mobilenet_fcn8s.pb"#"frozen_model.pb"# "optimized_model.pb"#"mobilenet_fcn8s.pb"
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     # Ask tensorflow logger not to propagate logs to parent (which causes
@@ -21,7 +23,7 @@ def main():
     logger.info('loading TRT graph from pb: %s' % pb_path)
     trt_graph = load_trt_pb(pb_path)
 
-
+    
 
 
     logger.info('starting up TensorFlow session')

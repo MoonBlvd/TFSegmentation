@@ -3,13 +3,15 @@
 Object detection utility functions.
 '''
 
-
+import sys
 import time
 
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.tensorrt as trt
 
+# sys.path.append('../../../')
+from convert_ckpt_to_pb import float2half
 
 MEASURE_MODEL_TIME = True
 avg_time = 0.0
@@ -78,8 +80,13 @@ def load_trt_pb(pb_path):
             node.device = '/device:GPU:0'
         if 'NonMaxSuppression' in node.name:
             node.device = '/device:CPU:0'
+    
     with tf.Graph().as_default() as trt_graph:
         tf.import_graph_def(trt_graph_def, name='')
+        
+    # convert from float32 to float16
+    _ = float2half(trt_graph.as_graph_def())
+    
     return trt_graph
 
 
