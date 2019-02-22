@@ -24,7 +24,7 @@ def model_to_graph(model, ops, drop_scope = ['Switch', 'Merge'],
                 tf.get_default_graph().as_graph_def(), # The graph_def is used to retrieve the nodes 
                 output_node_names.split(",") # The output node names are used to select the usefull nodes
             ) 
-     
+    print("original graph nodes:",len(output_graph_def.node))
     if not remove_training:
         return output_graph_def
     
@@ -33,11 +33,13 @@ def model_to_graph(model, ops, drop_scope = ['Switch', 'Merge'],
                         protected_nodes=None
                         )
     
+    print("graph nodes after removing training:",len(output_graph_def.node))
     if not strip_nodes:
         return output_graph_def
     
     '''Drop nodes that TRT doesn't support'''
     new_output_graph_def = strip(output_graph_def, drop_scope)
+    print("graph nodes after stripping:",len(new_output_graph_def.node))
     
     if not conver_to_half:
         return new_output_graph_def
@@ -143,7 +145,7 @@ def strip(input_graph, drop_scope):
                 filtered_input_name = filtered_input_name[1:]
             
             # change the input of the first Conv2D from concat to placeholder
-            if input_name == 'network/mobilenet_encoder/Pre_Processing/concat':
+            if input_name == 'network/mobilenet_encoder/Pre_Processing/concat' or input_name == 'network/shufflenet_encoder/Pre_Processing/concat':
                 # note that the order of the inputs to a node matters!
                 new_node.input[input_idx] = all_nodes_hash['network/input/Placeholder'].name
 

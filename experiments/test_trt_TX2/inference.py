@@ -11,7 +11,7 @@ sys.path.append('../../')
 from convert_ckpt_to_pb import float2half
 def main():
 
-    pb_path = "../fcn8s_mobilenet/train_val_checkpoints/checkpoints/best/final_model.pb"#"mobilenet_fcn8s.pb"#"frozen_model.pb"# "optimized_model.pb"#"mobilenet_fcn8s.pb"
+    pb_path = "../unet_mobilenet/checkpoints/best/final_model.pb"#"mobilenet_fcn8s.pb"#"frozen_model.pb"# "optimized_model.pb"#"mobilenet_fcn8s.pb"
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     # Ask tensorflow logger not to propagate logs to parent (which causes
@@ -38,7 +38,7 @@ def main():
     logger.info('warming up the TRT graph with a dummy image')
     # od_type = 'faster_rcnn' if 'faster_rcnn' in args.model else 'ssd'
     # dummy_img = np.zeros((8, 512, 512, 3), dtype=np.uint8)
-    all_images = np.load('/media/DATA/UnrealLandingDataset/AirSimCollectData/X_val.npy')
+    all_images = np.load('/media/DATA/UnrealLandingDataset/AirSimCollectData/CV_Manual/X_val.npy')
     
     elipse = 0
 
