@@ -180,12 +180,8 @@ def strip(input_graph, drop_scope):
                             node_input = all_nodes_hash[node_input].input[i]
                             break
                     if not detoured:
-                        ew_node.input.remove(input_name)
+                        new_node.input.remove(input_name)
                 new_node.input[input_idx] = node_input
-
-
-
-
             except:
                 print("Error node: ", new_node)
                 raise NameError(filtered_input_name)
