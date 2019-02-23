@@ -181,6 +181,7 @@ def strip(input_graph, drop_scope):
                             break
                     if not detoured:
                         new_node.input.remove(input_name)
+                        node_input = new_node.name # input is itself
                 new_node.input[input_idx] = node_input
             except:
                 print("Error node: ", new_node)
