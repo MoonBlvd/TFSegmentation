@@ -4,6 +4,7 @@ import numpy as np
 from models.fcn8s_mobilenet import FCN8sMobileNet
 from models.fcn8s_shufflenet import FCN8sShuffleNet
 from models.unet_mobilenet import UNetMobileNet
+from models.unet_shufflenet import UNetShuffleNet
 
 from train import *
 from test import *
@@ -27,6 +28,8 @@ class Segmentor():
             self.model = FCN8sShuffleNet
         elif self.args.model == 'UNetMobileNet':
             self.model = UNetMobileNet
+        elif self.args.model == 'UNetShuffleNet':
+            self.model = UNetShuffleNet
         else:
             raise NameError(self.args.model+' unknown!!')
         

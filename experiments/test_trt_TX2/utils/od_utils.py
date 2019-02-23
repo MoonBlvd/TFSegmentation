@@ -161,7 +161,7 @@ def segment(origimg, tf_sess, od_type='ssd'):
     global avg_time
 
     tf_input = tf_sess.graph.get_tensor_by_name('network/input/Placeholder:0')
-    tf_output = tf_sess.graph.get_tensor_by_name('network/upscore_8s/upscore8/upscore8/BiasAdd:0') # 'network/output/Softmax:0'
+    tf_output = tf_sess.graph.get_tensor_by_name('network/output/Softmax:0') # 'network/upscore_8s/upscore8/upscore8/BiasAdd:0' 'network/output/Softmax:0'
     #tf_num = tf_sess.graph.get_tensor_by_name('num_detections:0')
 
 
