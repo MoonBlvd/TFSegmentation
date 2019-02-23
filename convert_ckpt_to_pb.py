@@ -172,20 +172,21 @@ def strip(input_graph, drop_scope):
 
                 # detour the input of the node until the input is not Switch or Merge
             node_input = filtered_input_name
-            while all_nodes_hash[node_input].op in drop_scope:
-                detoured = False
-                for i in range(len(all_nodes_hash[node_input].input)):
-                    if all_nodes_hash[node_input].input[i] != "network/input/Placeholder_2":
-                        detoured = True
-                        node_input = all_nodes_hash[node_input].input[i]
-                        break
-                if not detoured:
-                    new_node.input.remove(input_name)
-                    node_input = new_node.name # input is itself
-            if detoured:
-                new_node.input[input_idx] = node_input
-            else:
-                pass
+            if all_nodes_hash[node_input].op in drop_scope:
+                while all_nodes_hash[node_input].op in drop_scope:
+                    detoured = False
+                    for i in range(len(all_nodes_hash[node_input].input)):
+                        if all_nodes_hash[node_input].input[i] != "network/input/Placeholder_2":
+                            detoured = True
+                            node_input = all_nodes_hash[node_input].input[i]
+                            break
+                    if not detoured:
+                        new_node.input.remove(input_name)
+                        node_input = new_node.name # input is itself
+                if detoured:
+                    new_node.input[input_idx] = node_input
+                else:
+                    pass
             # except:
             #     print("Error node: ", new_node)
             #     raise NameError(filtered_input_name)
