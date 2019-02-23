@@ -150,25 +150,38 @@ def strip(input_graph, drop_scope):
                 new_node.input[input_idx] = all_nodes_hash['network/input/Placeholder'].name
 
             try:
-                if all_nodes_hash[filtered_input_name].op == 'Switch':
-                    # if one input to the current node is a Switch node, then get rid of that Switch node 
-                    # by changing the input of the current tobe the input to that Switch node.
-                    input_detoured = False
-                    for input_of_switch in all_nodes_hash[filtered_input_name].input:
-                        if input_of_switch != "network/input/Placeholder_2":
-                            new_node.input[input_idx] = input_of_switch
-                            input_detoured = True
-                            #new_node.input.append(input_of_input)
-                    if not input_detoured:
-                        #remove the input if it has two inputs and both are placeholder_2
-                        new_node.input.remove(input_name)
+                # if all_nodes_hash[filtered_input_name].op == 'Switch':
+                #     # if one input to the current node is a Switch node, then get rid of that Switch node 
+                #     # by changing the input of the current tobe the input to that Switch node.
+                #     input_detoured = False
+                #     for input_of_switch in all_nodes_hash[filtered_input_name].input:
+                #         if input_of_switch != "network/input/Placeholder_2":
+                #             new_node.input[input_idx] = input_of_switch
+                #             input_detoured = True
+                #             #new_node.input.append(input_of_input)
+                #     if not input_detoured:
+                #         #remove the input if it has two inputs and both are placeholder_2
+                #         new_node.input.remove(input_name)
                 
-                if all_nodes_hash[filtered_input_name].op == 'Merge':
-                    '''
-                    Merge node merges multiple input by forwarding the first recieved input as the output
-                    Thus we remove Merge nodes by always forwarding the first input to the Merge node to teh output
-                    '''
-                    new_node.input[input_idx] = all_nodes_hash[filtered_input_name].input[0]
+                # if all_nodes_hash[filtered_input_name].op == 'Merge':
+                #     '''
+                #     Merge node merges multiple input by forwarding the first recieved input as the output
+                #     Thus we remove Merge nodes by always forwarding the first input to the Merge node to teh output
+                #     '''
+                #     new_node.input[input_idx] = all_nodes_hash[filtered_input_name].input[0]
+
+                # detour the input of the node until the input is not Switch or Merge
+                node_input = filtered_input_name
+                while all_nodes_hash[node_input].op in drop_scope:
+                     for i in range(len(all_nodes_hash[node_input].input)):
+                         if all_nodes_hash[node_input].input[i] != "network/input/Placeholder_2":
+                             node_input = all_nodes_hash[node_input].input[i]
+                             break
+                
+                new_node.input[input_idx] = node_input
+
+
+
 
             except:
                 print("Error node: ", new_node)
