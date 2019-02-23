@@ -149,7 +149,7 @@ def strip(input_graph, drop_scope):
                 # note that the order of the inputs to a node matters!
                 new_node.input[input_idx] = all_nodes_hash['network/input/Placeholder'].name
 
-            try:
+            # try:
                 # if all_nodes_hash[filtered_input_name].op == 'Switch':
                 #     # if one input to the current node is a Switch node, then get rid of that Switch node 
                 #     # by changing the input of the current tobe the input to that Switch node.
@@ -171,21 +171,21 @@ def strip(input_graph, drop_scope):
                 #     new_node.input[input_idx] = all_nodes_hash[filtered_input_name].input[0]
 
                 # detour the input of the node until the input is not Switch or Merge
-                node_input = filtered_input_name
-                while all_nodes_hash[node_input].op in drop_scope:
-                    detoured = False
-                    for i in range(len(all_nodes_hash[node_input].input)):
-                        if all_nodes_hash[node_input].input[i] != "network/input/Placeholder_2":
-                            detoured = True
-                            node_input = all_nodes_hash[node_input].input[i]
-                            break
-                    if not detoured:
-                        new_node.input.remove(input_name)
-                        node_input = new_node.name # input is itself
-                new_node.input[input_idx] = node_input
-            except:
-                print("Error node: ", new_node)
-                raise NameError(filtered_input_name)
+            node_input = filtered_input_name
+            while all_nodes_hash[node_input].op in drop_scope:
+                detoured = False
+                for i in range(len(all_nodes_hash[node_input].input)):
+                    if all_nodes_hash[node_input].input[i] != "network/input/Placeholder_2":
+                        detoured = True
+                        node_input = all_nodes_hash[node_input].input[i]
+                        break
+                if not detoured:
+                    new_node.input.remove(input_name)
+                    node_input = new_node.name # input is itself
+            new_node.input[input_idx] = node_input
+            # except:
+            #     print("Error node: ", new_node)
+            #     raise NameError(filtered_input_name)
         nodes_after_strip.append(new_node)
 
     print("New graph is built!")
