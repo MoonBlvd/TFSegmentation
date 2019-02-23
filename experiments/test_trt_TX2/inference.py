@@ -7,12 +7,17 @@ import copy
 import os 
 from utils.od_utils import build_trt_pb, load_trt_pb, \
                            write_graph_tensorboard, segment
+
+import json
 import sys
 sys.path.append('../../')
 from metrics.metrics import Metrics
 from convert_ckpt_to_pb import float2half
 
 import argparse
+record_fields = ['command', 'environment', 'tag', 'uid', 'building', 'time', 'metric', 'misc']
+
+output_records = []
 
 def main():
     parser = argparse.ArgumentParser()
@@ -46,15 +51,14 @@ def main():
     logger.info('warming up the TRT graph with a dummy image')
     # od_type = 'faster_rcnn' if 'faster_rcnn' in args.model else 'ssd'
     # dummy_img = np.zeros((8, 512, 512, 3), dtype=np.uint8)
-    all_images = np.load('/media/DATA/UnrealLandingDataset/AirSimCollectData/CV_Random_Histogram/X_val.npy')
-    all_labels = np.load('/media/DATA/UnrealLandingDataset/AirSimCollectData/CV_Random_Histogram/Y_val.npy')
+    all_images = np.load('/media/DATA/UnrealLandingDataset/AirSimCollectData/LidarRoofManualTest/X_test.npy')
+    all_labels = np.load('/media/DATA/UnrealLandingDataset/AirSimCollectData/LidarRoofManualTest/Y_test.npy')
     
     elipse = 0
 
     metrics = Metrics(nclasses=18)
     means = [73.29132098, 83.04442645, 72.5238962] # bgr
     for i in range(0, all_images.shape[0], 1):
-#         try:
         # pre process        
         # subtract mean, normalize, then rgb to bgr
         image = all_images[i:i+1,:,:,:]
@@ -65,29 +69,48 @@ def main():
         
         start = time.time()
         segmentation = segment(new_image, tf_sess)
-        if i > 0:
-            elipse += time.time() - start
+        elipse = time.time() - start
         
+        # write records
+        curr_record = dict(uid=i,
+                           command='predict_segmentation', 
+                           environment='tx2',
+                           building=None,
+                           time=elipse*1000,
+                           metric=None,
+                           misc=None,
+                           tag=None)
+#         curr_record['command'] = 'predict_segmentation'
+#         curr_record['environment'] = 'tx2'
+#         curr_record['tag'] = None
+#         curr_record['uid'] = i, 
+#         curr_record['building'] = None 
+#         curr_record['time'] = elipse*1000, 
+#         curr_record['metric'] = None
+#         curr_record['misc'] = None
+        output_records.append(curr_record)
+        print(curr_record)
 #         print("segmentation: ", segmentation.shape)
-        segmentation = np.argmax(segmentation, axis=1).astype(int)#tf.argmax(segmentation, axis=1, output_type=tf.int32)
+        segmentation = np.argmax(segmentation, axis=1)#.astype(int)#tf.argmax(segmentation, axis=1, output_type=tf.int32)
         segmentation = segmentation.reshape((512, 512))#tf.reshape(segmentation,[512, 512])
         
-        img_name = str(format(i,'06'))+".png"
-        seg_img = Image.fromarray(segmentation)
-        seg_img.save(os.path.join(args.save_path, img_name))
-#         save_dir = os.path.join("fcn8s_mobilenet_trt",str(format(i,'06'))+".npy")
-#         np.save(save_dir, segmentation)
-        
+        if args.out_path is not None:
+            img_name = str(i)+"-0.png"
+            seg_img = Image.fromarray(np.uint8(segmentation))
+            seg_img.save(os.path.join(args.out_path, img_name))
+            
+
         # update metrics
         label = all_labels[i:i+1,:,:]
         metrics.update_metrics(segmentation, label, 0, 0)
 
-        if i%100 == 0:
+        if i%10 == 0:
             print(i)
-#         except:
-#             print("error")
-#             pass
-    print(elipse/(i))
+    
+#     with open(args.model+'.json','w') as f:
+#         json.dump(output_records, f, indent=2)
+
+#     print(elipse/(i+1))
     print("segmentation size:", segmentation.shape)
     nonignore = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
     iou, mean_iou = metrics.compute_final_metrics(1, nonignore=nonignore)
