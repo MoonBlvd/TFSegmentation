@@ -91,24 +91,24 @@ def main():
         output_records.append(curr_record)
         print(curr_record)
 #         print("segmentation: ", segmentation.shape)
-        segmentation = np.argmax(segmentation, axis=1)#.astype(int)#tf.argmax(segmentation, axis=1, output_type=tf.int32)
-        segmentation = segmentation.reshape((512, 512))#tf.reshape(segmentation,[512, 512])
+        # segmentation = np.argmax(segmentation, axis=1)#.astype(int)#tf.argmax(segmentation, axis=1, output_type=tf.int32)
+        # segmentation = segmentation.reshape((512, 512))#tf.reshape(segmentation,[512, 512])
         
-        if args.out_path is not None:
-            img_name = str(i)+"-0.png"
-            seg_img = Image.fromarray(np.uint8(segmentation))
-            seg_img.save(os.path.join(args.out_path, img_name))
+        # if args.out_path is not None:
+        #     img_name = str(i)+"-0.png"
+        #     seg_img = Image.fromarray(np.uint8(segmentation))
+        #     seg_img.save(os.path.join(args.out_path, img_name))
             
 
         # update metrics
-        label = all_labels[i:i+1,:,:]
-        metrics.update_metrics(segmentation, label, 0, 0)
+        # label = all_labels[i:i+1,:,:]
+        # metrics.update_metrics(segmentation, label, 0, 0)
 
         if i%10 == 0:
             print(i)
     
-#     with open(args.model+'.json','w') as f:
-#         json.dump(output_records, f, indent=2)
+    with open(args.model+'.json','w') as f:
+        json.dump(output_records, f, indent=2)
 
 #     print(elipse/(i+1))
     print("segmentation size:", segmentation.shape)

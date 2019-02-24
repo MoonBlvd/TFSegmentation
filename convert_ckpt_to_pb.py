@@ -12,13 +12,14 @@ DT_HALF = 19
 
 
 def model_to_graph(model, ops, drop_scope = ['Switch', 'Merge'], 
+                   output_node_names='network/output/Softmax',
                    verbose=True, 
                    save_file=None,
                    remove_training=True,
                    strip_nodes=False,
                    conver_to_half=False):
     '''Load graph from model'''
-    output_node_names = "network/output/Softmax"#"network/output/Reshape_1"#
+#     output_node_names = "network/output/Softmax"#"network/output/Reshape_1"#
     output_graph_def = tf.graph_util.convert_variables_to_constants(
                 model.sess, # The session is used to retrieve the weights
                 tf.get_default_graph().as_graph_def(), # The graph_def is used to retrieve the nodes 
