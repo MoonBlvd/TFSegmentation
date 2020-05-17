@@ -24,6 +24,8 @@ def main():
     parser.add_argument("-m","--model",help="model_name")
     parser.add_argument("-p","--model_path",help="path to the pb file")
     parser.add_argument("-o","--out_path",help="path to save the segmentation numpy")
+    parser.add_argument("-im","--image_path",help="path to the numpy that rgb images are saved")
+    parser.add_argument("-gt","--label_path",help="path to the numpy that labels are saved")
     
     args = parser.parse_args()
 
@@ -44,20 +46,25 @@ def main():
     tf_config.gpu_options.allow_growth = True
     tf_sess = tf.Session(config=tf_config, graph=trt_graph)
 
-    # if args.do_tensorboard:
-    #     logger.info('writing graph summary to TensorBoard')
-    #     write_graph_tensorboard(tf_sess, log_path)
+    tf_input = tf_sess.graph.get_tensor_by_name('network/input/Placeholder:0')
+    tf_output = tf_sess.graph.get_tensor_by_name('network/output/ArgMax:0')
+
 
     logger.info('warming up the TRT graph with a dummy image')
-    # od_type = 'faster_rcnn' if 'faster_rcnn' in args.model else 'ssd'
-    # dummy_img = np.zeros((8, 512, 512, 3), dtype=np.uint8)
-    all_images = np.load('/media/DATA/UnrealLandingDataset/AirSimCollectData/LidarRoofManualTest/X_test.npy')
-    all_labels = np.load('/media/DATA/UnrealLandingDataset/AirSimCollectData/LidarRoofManualTest/Y_test.npy')
-    
+    all_images = np.load(args.image_path)
+    all_labels = np.load(args.label_path)
+    print("------------------Data loaded!!------------------")
+    #uid_name_map = []
+    #with open('map_uid_img_name.txt','r') as f:
+    #    for row in f:
+    #        row = row.strip('\n')
+    #        uid_name_map.append(row)
+    #print(uid_name_map)  
     elipse = 0
 
     metrics = Metrics(nclasses=18)
     means = [73.29132098, 83.04442645, 72.5238962] # bgr
+    print("------------------Start Test!!------------------")
     for i in range(0, all_images.shape[0], 1):
         # pre process        
         # subtract mean, normalize, then rgb to bgr
@@ -68,47 +75,40 @@ def main():
         new_image[0,:,:,2] = (image[0,:,:,0] - means[2])/255.0
         
         start = time.time()
-        segmentation = segment(new_image, tf_sess)
+        segmentation = tf_sess.run(tf_output, feed_dict={tf_input: new_image})
         elipse = time.time() - start
         
         # write records
-        curr_record = dict(uid=i,
-                           command='predict_segmentation', 
-                           environment='tx2',
-                           building=None,
-                           time=elipse*1000,
-                           metric=None,
-                           misc=None,
-                           tag=None)
-#         curr_record['command'] = 'predict_segmentation'
-#         curr_record['environment'] = 'tx2'
-#         curr_record['tag'] = None
-#         curr_record['uid'] = i, 
-#         curr_record['building'] = None 
-#         curr_record['time'] = elipse*1000, 
-#         curr_record['metric'] = None
-#         curr_record['misc'] = None
-        output_records.append(curr_record)
-        print(curr_record)
-#         print("segmentation: ", segmentation.shape)
-        # segmentation = np.argmax(segmentation, axis=1)#.astype(int)#tf.argmax(segmentation, axis=1, output_type=tf.int32)
-        # segmentation = segmentation.reshape((512, 512))#tf.reshape(segmentation,[512, 512])
+        #img_name = uid_name_map[i] 
+        #uid=int(img_name.split('-')[0])
+        #curr_record = dict(uid=uid,
+        #                   command='predict_segmentation', 
+        #                   environment='tx2',
+        #                   building=None,
+        #                   time=elipse*1000,
+        #                   metric=None,
+        #                   misc=None,
+        #                   tag=None)
+        #output_records.append(curr_record)
+        #print(curr_record)
+        #print("segmentation: ", segmentation.shape)
+        #segmentation = np.argmax(segmentation, axis=1)#.astype(int)#tf.argmax(segmentation, axis=1, output_type=tf.int32)
+        #segmentation = segmentation.reshape((512, 512))#tf.reshape(segmentation,[512, 512])
         
-        # if args.out_path is not None:
-        #     img_name = str(i)+"-0.png"
-        #     seg_img = Image.fromarray(np.uint8(segmentation))
-        #     seg_img.save(os.path.join(args.out_path, img_name))
+        #if args.out_path is not None:
+        #    seg_img = Image.fromarray(np.uint8(segmentation[0]))
+        #    seg_img.save(os.path.join(args.out_path, img_name))
             
 
         # update metrics
-        # label = all_labels[i:i+1,:,:]
-        # metrics.update_metrics(segmentation, label, 0, 0)
+        label = all_labels[i:i+1,:,:]
+        metrics.update_metrics(segmentation, label, 0, 0)
 
-        if i%10 == 0:
+        if i%100 == 0:
             print(i)
     
-    with open(args.model+'.json','w') as f:
-        json.dump(output_records, f, indent=2)
+    #with open(args.model+'.json','w') as f:
+    #    json.dump(output_records, f, indent=2)
 
 #     print(elipse/(i+1))
     print("segmentation size:", segmentation.shape)
